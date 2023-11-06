@@ -1,0 +1,103 @@
+---
+title: "NYPD Shooting Incidents - Analysis"
+author: "Praveen Myakala"
+date: "2023-10-23"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+```
+
+## Get NYPD Shooting Incidents & Display Summary
+#### NYPD Shooting Incident Data (Historic) from the website: https://catalog.data.gov/datase
+
+```{r get_data, echo=TRUE}
+# Download data
+nypd_shooting_incidents <- read_csv("https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv")
+```
+
+## Displaying Summary
+```{r summary, echo=TRUE}
+# Display summary
+summary(nypd_shooting_incidents)
+```
+
+## Preparation and Cleaning
+#### Mainly removing duplicates by INCIDENT_KEY and selecting only required columns to analysis with mutate
+```{r prepare, echo=TRUE}
+# Distinct data with Mutate
+nypd_shooting_incidents <- nypd_shooting_incidents %>%
+  distinct(INCIDENT_KEY, .keep_all = TRUE) %>%
+  select(INCIDENT_KEY, PRECINCT, OCCUR_DATE, OCCUR_TIME, BORO, PERP_AGE_GROUP, PERP_SEX, PERP_RACE, VIC_AGE_GROUP, VIC_RACE, VIC_SEX,) %>%
+  mutate(OCCUR_DATE = mdy(OCCUR_DATE)) %>%
+  mutate(YEAR = year(OCCUR_DATE))
+```
+
+## Summary after cleaning
+```{r summary_clean_data, echo=TRUE}
+# Displaying summary
+summary(nypd_shooting_incidents)
+```
+
+
+#### Group by BORO and calculate the sum of incidents
+
+```{r by_boro, echo=TRUE}
+# Grouping incidents by BORO
+shootings_incidents_by_boro <- nypd_shooting_incidents %>% 
+  group_by(BORO) %>%  
+  summarize(incidents = n())
+
+```
+
+## Displaying Summary after grouping incidents by BORO
+```{r summary_of_boro, echo=TRUE}
+# Summary
+summary(shootings_incidents_by_boro)
+```
+
+
+
+```{r by_boro_graph, echo=TRUE}
+
+# ggplot code for bar graph
+
+ggplot(shootings_incidents_by_boro, aes(x=BORO, y=incidents, fill=BORO)) +
+  geom_bar(stat="identity") + 
+  xlab("BOROUGH") + ylab("INCIDENCES") +
+  ggtitle("Shooting Incidents By BOROUGHS") +
+  theme_minimal()
+
+```
+
+
+## NYPD Shooting incidents by victim gender
+
+```{r Vicitims_by_gender, echo=TRUE}
+# Graph with victim gender
+
+nypd_shooting_incidents %>% 
+  filter(VIC_SEX %in% c("F", "M")) %>%
+  count(YEAR, VIC_SEX) %>%
+  ggplot(aes(x = YEAR, y = n, color = VIC_SEX)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Shooting Incidents", title = "") + 
+  theme_minimal() + 
+  scale_color_manual(values = c("M" = "blue", "F" = "pink")) + 
+  theme_minimal()
+```
+
+## NYPD Shooting incidents over the course of the day by precint
+
+```{r over_the_day, echo=TRUE}
+
+# Graph incidents over time period
+
+ggplot(nypd_shooting_incidents, aes(x = OCCUR_TIME, y = PRECINCT, color = BORO)) + 
+  geom_point(size = 0.2) + 
+  theme_minimal()
+```
