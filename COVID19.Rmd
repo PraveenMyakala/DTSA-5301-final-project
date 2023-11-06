@@ -2,7 +2,9 @@
 title: "Report on COVID19 Data"
 author: "Praveen Myakala"
 date: "2023-11-06"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
