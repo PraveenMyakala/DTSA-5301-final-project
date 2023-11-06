@@ -82,7 +82,7 @@ deaths_in_us_year_wise$MONTH_YEAR <- paste0(month.abb[deaths_in_us_year_wise$MON
 
 ggplot(deaths_in_us_year_wise, aes(y=MONTH_YEAR, x=deaths)) +
   geom_bar(stat="identity") + 
-  ylab("Month") + xlab("Deaths (Millions)
+  ylab("Month") + xlab("Deaths (Millions)") +
   scale_x_continuous(labels = scales::comma_format(scale = 1e-6)) +
   ggtitle("Deaths in USA - Month wise") +
   theme_minimal()
